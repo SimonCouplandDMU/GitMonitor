@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+<h3>GitMonitor</h3>
+
+<input type="file" id="file-input" />
+<button id="read-button">Read File</button>
+
+<p id="debug"></p>
+
+<script>
+function log(message)
+{
+	document.getElementById("debug").innerHTML = message;
+}
+
+document.querySelector("#read-button").addEventListener('click', function() 
+{
+	if(document.querySelector("#file-input").files.length == 0) {
+		alert('Error : No file selected');
+		return;
+	}
+
+	let file = document.querySelector("#file-input").files[0];
+	let reader = new FileReader();
+
+	reader.addEventListener('load', function(e) {
+	    let fileContents = e.target.result;
+	    log(fileContents);
+	});
+
+	reader.addEventListener('error', function() {
+	    alert('Error : Failed to read file');
+	});
+	reader.readAsText(file);
+}
+);
+</script>
+</body>
+</html>
