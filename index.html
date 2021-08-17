@@ -5,24 +5,28 @@
 <body>
 <h3>GitMonitor</h3>
 
-<input type="file" id="file-input" />
-<button id="read-button">Read File</button>
-
+<input type="file" id="file-input" /><br />
+<button id="read-button">Read File</button><br />
+Repo prefix: https://github.com/<input type="text" id="repo-prefix" /><br />
+<button id="clone-button">Clone Repos</button><br />
 <p id="debug"></p>
 
 <script>
+var roster;
+
 function log(message)
 {
 	document.getElementById("debug").innerHTML = message;
 }
 
-function processRoster(roster)
+function RosterToJSON(roster)
 {
 	var textRoster = "";
 	textRoster = "{\n\"roster\":[\n";
 	const lines = roster.split("\n");
-	//for (var i = 0; i < xs.length; i++) { console.log(xs[i]); }
-	for (var i = 0; i <  lines.length - 1; i++) 
+	// We don't want the first line - it's file names
+	// We don't want the last line - it's blank
+	for (var i = 1; i <  lines.length - 1; i++) 
 	{ 
 		const cells = lines[i].split(",");
 		textRoster += "{\"identifier\":" + cells[0] + ", ";
@@ -34,14 +38,32 @@ function processRoster(roster)
 	textRoster = textRoster.slice(0, -3);
 	textRoster += "\n]}";
 	
-	log("<tt>" + textRoster + "</tt>");
-	
-	var jsonRoster = JSON.parse(textRoster);
-	
-	
+	return textRoster;
 }
 
-document.querySelector("#read-button").addEventListener('click', function() 
+function writeCloneBatFile()
+{
+	var batchText = "mkdir repos</br>";
+	
+	for (var i = 0; i < roster.roster.length; i++)
+	{
+		if(roster.roster[i].hasOwnProperty("github_username"))
+		{
+			if(roster.roster[i]["github_username"].length > 0)
+			{
+				var name = roster.roster[i]["identifier"]
+				var writeableName = name.replaceAll(" ","_");
+		
+				batchText += "mkdir " + "repos/" + writeableName + "</br>";
+				batchText += "git clone https://github.com/" + document.querySelector("#repo-prefix").value + roster.roster[i]["github_username"] + ".git repos/" + roster.roster[i]["github_username"] + "</br>";
+			}
+		}
+	}
+	log(batchText);
+}
+
+document.querySelector("#read-button").addEventListener('click', 
+function() 
 {
 	if(document.querySelector("#file-input").files.length == 0) {
 		alert('Error : No file selected');
@@ -53,7 +75,7 @@ document.querySelector("#read-button").addEventListener('click', function()
 
 	reader.addEventListener('load', function(e) {
 	    let fileContents = e.target.result;
-	    processRoster(fileContents);
+	    roster = JSON.parse(RosterToJSON(fileContents));
 	});
 
 	reader.addEventListener('error', function() {
@@ -62,6 +84,8 @@ document.querySelector("#read-button").addEventListener('click', function()
 	reader.readAsText(file);
 }
 );
+
+document.querySelector("#clone-button").addEventListener('click', writeCloneBatFile);
 </script>
 </body>
 </html>
