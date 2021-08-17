@@ -16,6 +16,31 @@ function log(message)
 	document.getElementById("debug").innerHTML = message;
 }
 
+function processRoster(roster)
+{
+	var textRoster = "";
+	textRoster = "{\n\"roster\":[\n";
+	const lines = roster.split("\n");
+	//for (var i = 0; i < xs.length; i++) { console.log(xs[i]); }
+	for (var i = 0; i <  lines.length - 1; i++) 
+	{ 
+		const cells = lines[i].split(",");
+		textRoster += "{\"identifier\":" + cells[0] + ", ";
+		textRoster += "\"github_username\":" + cells[1] + ", ";
+		textRoster += "\"github_id\":" + cells[2] + ", ";
+		textRoster += "\"name\":" + cells[3];
+		textRoster += "}, \n";
+	}
+	textRoster = textRoster.slice(0, -3);
+	textRoster += "\n]}";
+	
+	log("<tt>" + textRoster + "</tt>");
+	
+	var jsonRoster = JSON.parse(textRoster);
+	
+	
+}
+
 document.querySelector("#read-button").addEventListener('click', function() 
 {
 	if(document.querySelector("#file-input").files.length == 0) {
@@ -28,7 +53,7 @@ document.querySelector("#read-button").addEventListener('click', function()
 
 	reader.addEventListener('load', function(e) {
 	    let fileContents = e.target.result;
-	    log(fileContents);
+	    processRoster(fileContents);
 	});
 
 	reader.addEventListener('error', function() {
